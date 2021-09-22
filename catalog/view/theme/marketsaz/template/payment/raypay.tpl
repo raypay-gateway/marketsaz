@@ -9,14 +9,10 @@
 </div>
 <?php } else { ?>
 <div class="buttons">
-  <form action="<?php echo $action; ?>" method="post">
-    <input type="hidden" name="token" value="<?php echo $token; ?>" />
-    <input type="hidden" name="TerminalID" value="<?php echo $terminal_id; ?>" />
     <div class="buttons">
       <div class="pull-right">
-        <input type="submit" value="<?php echo $button_confirm; ?>" class="btn btn-primary" />
+        <a href="<?php echo $action; ?>" class="btn btn-primary" ><?php echo $button_confirm; ?></a>
       </div>
     </div>
-  </form>
 </div>
 <?php } ?>

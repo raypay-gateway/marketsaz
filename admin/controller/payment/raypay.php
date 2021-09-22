@@ -28,7 +28,8 @@ class ControllerPaymentRayPay extends Controller
 		$this->data['text_no'] = $this->language->get('text_no');
 
 		$this->data['entry_user_id'] = $this->language->get('entry_user_id');
-        $this->data['entry_acceptor_code'] = $this->language->get('entry_acceptor_code');
+        $this->data['entry_marketing_id'] = $this->language->get('entry_marketing_id');
+        $this->data['entry_sandbox'] = $this->language->get('entry_sandbox');
 		$this->data['entry_order_status'] = $this->language->get('entry_order_status');
 		$this->data['entry_status'] = $this->language->get('entry_status');
 		$this->data['entry_sort_order'] = $this->language->get('entry_sort_order');
@@ -77,13 +78,22 @@ class ControllerPaymentRayPay extends Controller
 			$this->data['raypay_user_id'] = $this->config->get('raypay_user_id');
 		}
 
-        if (isset($this->request->post['raypay_acceptor_code'])) {
+        if (isset($this->request->post['raypay_marketing_id'])) {
 
-            $this->data['raypay_acceptor_code'] = $this->request->post['raypay_acceptor_code'];
+            $this->data['raypay_marketing_id'] = $this->request->post['raypay_marketing_id'];
 
         } else {
 
-            $this->data['raypay_acceptor_code'] = $this->config->get('raypay_acceptor_code');
+            $this->data['raypay_marketing_id'] = $this->config->get('raypay_marketing_id');
+        }
+
+        if (isset($this->request->post['raypay_sandbox'])) {
+
+            $this->data['raypay_sandbox'] = $this->request->post['raypay_sandbox'];
+
+        } else {
+
+            $this->data['raypay_sandbox'] = $this->config->get('raypay_sandbox');
         }
 
 		if (isset($this->request->post['raypay_order_status_id'])) {
@@ -135,9 +145,9 @@ class ControllerPaymentRayPay extends Controller
 
 			$this->error['warning'] = $this->language->get('error_user_id');
 		}
-        if (!@$this->request->post['raypay_acceptor_code']) {
+        if (!@$this->request->post['raypay_marketing_id']) {
 
-            $this->error['warning'] = $this->language->get('error_acceptor_code');
+            $this->error['warning'] = $this->language->get('error_marketing_id');
         }
 
 		if (!$this->error) {

@@ -29,13 +29,26 @@
           <?php } ?></td>
       </tr>
       <tr>
-        <td width="25%"><span class="required">*</span> <?php echo $entry_acceptor_code; ?></td>
-        <td><input type="text" name="raypay_acceptor_code" value="<?php echo $raypay_acceptor_code; ?>" />
+        <td width="25%"><span class="required">*</span> <?php echo $entry_marketing_id; ?></td>
+        <td><input type="text" name="raypay_marketing_id" value="<?php echo $raypay_marketing_id; ?>" />
           <br />
-          <?php if ($error_acceptor_code) { ?>
-          <span class="error"><?php echo $error_acceptor_code; ?></span>
+          <?php if ($error_marketing_id) { ?>
+          <span class="error"><?php echo $error_marketing_id; ?></span>
           <?php } ?></td>
       </tr>
+        <tr>
+            <td><?php echo $entry_sandbox; ?></td>
+            <td><select name="raypay_sandbox">
+                    <?php if ($raypay_sandbox == "yes") { ?>
+                    <option value="yes" selected="selected"><?php echo $text_yes; ?></option>
+                    <option value="no"><?php echo $text_no; ?></option>
+                    <?php } else { ?>
+                    <option value="yes"><?php echo $text_yes; ?></option>
+                    <option value="no" selected="selected"><?php echo $text_no; ?></option>
+                    <?php } ?>
+                </select>
+            </td>
+        </tr>
       <tr>
         <td><?php echo $entry_order_status; ?></td>
         <td><select name="raypay_order_status_id">

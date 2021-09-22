@@ -28,12 +28,13 @@ class ControllerPaymentRayPay extends Controller
 		if($order_info['currency'] != "RLS" && $order_info['currency'] != "IRR" && $this->currency->getCode() != 'RLS'&& $this->currency->getCode() != 'IRR'){
 			$amount = $amount * 10;
 		}
-		$subUrl = 'payment/raypay/callback&order_id='.$order_info['order_id'] . '&';
+		$subUrl = 'payment/raypay/callback&order_id='.$order_info['order_id'];
 		$redirect = $this->url->http($subUrl);
 		$redirectUrl = str_replace('&amp;', '&', $redirect);
 		$invoice_id             = round(microtime(true) * 1000);
 		$user_id = $this->config->get('raypay_user_id');
-		$acceptor_code = $this->config->get('raypay_acceptor_code');
+		$marketing_id = $this->config->get('raypay_marketing_id');
+		$sandbox = !($this->config->get('raypay_sandbox') == 'no');
 		$description = 'پرداخت  فروشگاه مارکت ساز با شماره سفارش ' . $order_info['order_id'];
 
 		if (extension_loaded('curl')) {
@@ -43,20 +44,18 @@ class ControllerPaymentRayPay extends Controller
 				'userID'       => $user_id,
 				'redirectUrl'  => $redirectUrl,
 				'factorNumber' => strval($order_info['order_id']),
-				'acceptorCode' => $acceptor_code,
-				'comment'      => $description
+				'marketingID' => $marketing_id,
+				'comment'      => $description,
+				'enableSandBox' => $sandbox,
 			);
 
-			$result = $this->common('https://api.raypay.ir/raypay/api/v1/Payment/getPaymentTokenWithUserID', $params);
+			$result = $this->common('https://api.raypay.ir/raypay/api/v1/Payment/pay', $params);
 			$result = json_decode($result);
 
-			if (isset($result->Data) && $result->StatusCode == 200) {
-				$access_token = $result->Data->Accesstoken;
-				$terminal_id  = $result->Data->TerminalID;
-				$this->data['action'] = 'https://mabna.shaparak.ir:8080/Pay';
-				$this->data['token'] = $access_token;
-				$this->data['terminal_id'] = $terminal_id;
-
+			if (isset($result->Data)) {
+				$token = $result->Data;
+				$link='https://my.raypay.ir/ipg?token=' . $token;
+				$this->data['action'] = $link;
 			} else {
 
 				$code = isset($result->StatusCode) ? $result->StatusCode : 'Undefined';
@@ -89,16 +88,12 @@ class ControllerPaymentRayPay extends Controller
 		$this->load->language('payment/raypay');
 		$this->load->model('checkout/order');
 
-		if ($this->request->get['?invoiceID'] && $this->request->get['order_id']) {
+		if ( $this->request->get['order_id']) {
 
 			$order_id = $this->request->get['order_id'];
-			$invoice_id = $this->request->get['?invoiceID'];
 			$order_info = $this->model_checkout_order->getOrder($order_id);
-			$params = array(
-				'order_id' => $order_id
-			);
 
-			$result = $this->common('https://api.raypay.ir/raypay/api/v1/Payment/checkInvoice?pInvoiceID=' . $invoice_id, $params);
+			$result = $this->common('https://api.raypay.ir/raypay/api/v1/Payment/verify', $_POST);
 			$result = json_decode($result);
 
 			if ( $result->StatusCode != 200) {
@@ -109,8 +104,9 @@ class ControllerPaymentRayPay extends Controller
 
 			} else {
 
-				if (isset($result->Data) && $result->Data->State == 1) {
-					$this->model_checkout_order->confirm($order_info['order_id'], $this->config->get('raypay_order_status_id'), $invoice_id);
+				if (isset($result->Data) && $result->Data->Status == 1) {
+					$verify_invoice_id = $result->Data->InvoiceID;
+					$this->model_checkout_order->confirm($order_info['order_id'], $this->config->get('raypay_order_status_id'), $verify_invoice_id);
 
 				}
 				else{
